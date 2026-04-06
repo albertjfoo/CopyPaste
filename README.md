@@ -1,8 +1,10 @@
-[README.md](https://github.com/user-attachments/files/26494163/README.md)
-
-Try it now -> copypaste-production-b336.up.railway.app
-
 # CopyPaste — AI-Powered 3D Printing for Everyone
+
+🔗 **[copypaste-production-b336.up.railway.app](https://copypaste-production-b336.up.railway.app)**
+
+| Film it | Print it |
+|---|---|
+| ![Video demo](Video.gif) | ![Print demo](Print.gif) |
 
 > *My mom kept calling me to print things for her. I built this so she doesn't have to.*
 
@@ -100,13 +102,13 @@ A simple order summary shows the 3D model alongside the material swatch in a pro
 |---|---|
 | Framework | Next.js 16 (App Router) |
 | Styling | Tailwind CSS |
-| 3D Preview | Three.js + React Three Fiber |
+| 3D Preview | Google `<model-viewer>` web component |
 | 3D Generation | Meshy Multi-Image to 3D API |
 | Texture Adjustment | Meshy Text-to-Texture API |
 | Auto Sizing | Meshy `auto_size: true` |
 | AR (iOS) | USDZ + Apple Quick Look (`rel="ar"`) |
 | AR (Android) | GLB + Google Scene Viewer intent |
-| Dimension Annotations | Three.js `Line` + `drei` `Html` in 3D space |
+| Dimension Annotations | Overlay badges from `model-viewer` `getDimensions()` |
 | Video/Camera | MediaRecorder + getUserMedia |
 | Frame Scoring | Laplacian variance (canvas) |
 | Deployment | Railway |
