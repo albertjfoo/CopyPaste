@@ -1,19 +1,16 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ExtractedFrame } from '@/lib/frameExtractor'
 import Image from 'next/image'
 
 export default function PreviewPage() {
   const router = useRouter()
-  const [frames, setFrames] = useState<ExtractedFrame[]>([])
-  const [prompt, setPrompt] = useState('')
-  const [listening, setListening] = useState(false)
+  const [frames, setFrames]     = useState<ExtractedFrame[]>([])
+  const [prompt, setPrompt]     = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null)
+  const [error, setError]       = useState('')
 
   useEffect(() => {
     try {
@@ -27,22 +24,6 @@ export default function PreviewPage() {
       router.replace('/record')
     }
   }, [router])
-
-  const startListening = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SR) return
-    const r = new SR()
-    r.continuous = false
-    r.interimResults = false
-    r.lang = 'en-US'
-    r.onresult = (e: SpeechRecognitionEvent) => setPrompt(e.results[0][0].transcript)
-    r.onend = () => setListening(false)
-    r.onerror = () => setListening(false)
-    recognitionRef.current = r
-    r.start()
-    setListening(true)
-  }
 
   const handleGenerate = async () => {
     setSubmitting(true)
@@ -58,8 +39,6 @@ export default function PreviewPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'API error')
-
-      // Persist prompt for use in material step
       sessionStorage.setItem('makeit_prompt', prompt)
       sessionStorage.setItem('makeit_task_id', data.taskId)
       router.push(`/generating/${data.taskId}`)
@@ -79,7 +58,6 @@ export default function PreviewPage() {
 
   return (
     <div className="min-h-screen bg-orange-50 flex flex-col">
-      {/* Header */}
       <div className="bg-white shadow-sm p-4 flex items-center gap-3">
         <button onClick={() => router.push('/record')} className="text-orange-500 text-xl font-bold">
           ← Redo
@@ -90,60 +68,34 @@ export default function PreviewPage() {
       </div>
 
       <div className="flex-1 p-4 flex flex-col gap-5 max-w-lg mx-auto w-full">
-        {/* Main preview — largest frame */}
         <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-xl bg-gray-100">
-          <Image
-            src={frames[0].dataUrl}
-            alt="Preview"
-            fill
-            className="object-cover"
-            unoptimized
-          />
+          <Image src={frames[0].dataUrl} alt="Preview" fill className="object-cover" unoptimized />
           <div className="absolute bottom-3 left-3 bg-black/50 text-white text-sm font-semibold px-3 py-1 rounded-full backdrop-blur">
             {frames.length} photos captured ✓
           </div>
         </div>
 
-        {/* Thumbnail strip */}
         {frames.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-1">
             {frames.map((f, i) => (
-              <div
-                key={i}
-                className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 border-orange-200"
-              >
+              <div key={i} className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 border-orange-200">
                 <Image src={f.dataUrl} alt={`Frame ${i + 1}`} fill className="object-cover" unoptimized />
               </div>
             ))}
           </div>
         )}
 
-        {/* Optional description */}
         <div className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
           <p className="text-lg font-bold text-gray-700">
             What is it? <span className="font-normal text-gray-400">(optional)</span>
           </p>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. a coffee mug, a toy car…"
-              className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-orange-400"
-            />
-            <button
-              onClick={startListening}
-              className={`px-4 py-3 rounded-xl text-2xl border-2 transition-colors ${
-                listening ? 'bg-red-100 border-red-400 animate-pulse' : 'bg-gray-100 border-gray-200'
-              }`}
-              aria-label="Speak"
-            >
-              🎤
-            </button>
-          </div>
-          {listening && (
-            <p className="text-sm text-red-500 animate-pulse">Listening… go ahead!</p>
-          )}
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="e.g. a coffee mug, a toy car…"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-orange-400"
+          />
         </div>
 
         {error && (
@@ -152,7 +104,6 @@ export default function PreviewPage() {
           </div>
         )}
 
-        {/* Generate button */}
         <button
           onClick={handleGenerate}
           disabled={submitting}

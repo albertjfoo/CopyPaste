@@ -37,11 +37,7 @@ export default function ResultPage() {
   const [editProgress, setEditProgress] = useState(0)
   const [editMsg, setEditMsg]       = useState('')
   const [editError, setEditError]   = useState('')
-  const [listening, setListening]   = useState(false)
   const msgIdx = useRef(0)
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null)
 
   useEffect(() => {
     try {
@@ -65,22 +61,6 @@ export default function ResultPage() {
     setEditMsg(FUN_RETEXTURE[0])
     return () => clearInterval(interval)
   }, [editState])
-
-  const startListening = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SR) return
-    const r = new SR()
-    r.continuous = false
-    r.interimResults = false
-    r.lang = 'en-US'
-    r.onresult = (e: SpeechRecognitionEvent) => setEditText(e.results[0][0].transcript)
-    r.onend = () => setListening(false)
-    r.onerror = () => setListening(false)
-    recognitionRef.current = r
-    r.start()
-    setListening(true)
-  }
 
   const submitEdit = async () => {
     if (!editText.trim() || !modelUrls) return
@@ -203,26 +183,14 @@ export default function ResultPage() {
             <p className="text-sm text-gray-400">
               Try: "make it look like wood", "make it shiny", "make it blue"
             </p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                placeholder="Describe the change…"
-                className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-orange-400"
-                autoFocus
-              />
-              <button
-                onClick={startListening}
-                className={`px-4 py-3 rounded-xl text-2xl border-2 ${
-                  listening ? 'bg-red-100 border-red-400 animate-pulse' : 'bg-gray-100 border-gray-200'
-                }`}
-                aria-label="Speak"
-              >
-                🎤
-              </button>
-            </div>
-            {listening && <p className="text-sm text-red-500 animate-pulse">Listening…</p>}
+            <input
+              type="text"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              placeholder="Describe the change…"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-orange-400"
+              autoFocus
+            />
             <div className="flex gap-2">
               <button
                 onClick={() => { setEditState('idle'); setEditText('') }}
