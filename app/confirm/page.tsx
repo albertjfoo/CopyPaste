@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import type { ModelViewerHandle, Dims } from '@/components/ModelViewer'
 
 const ModelViewer = dynamic(() => import('@/components/ModelViewer'), {
   ssr: false,
@@ -13,49 +14,12 @@ const ModelViewer = dynamic(() => import('@/components/ModelViewer'), {
   ),
 })
 
-import type { Dims } from '@/components/ModelViewer'
-
-function launchAR(glbUrl: string, usdzUrl: string) {
-  const ua = navigator.userAgent
-
-  // iOS / iPadOS → Quick Look (needs a USDZ or reality file)
-  if (/iP(hone|ad|od)/.test(ua) && usdzUrl) {
-    const a = document.createElement('a')
-    a.setAttribute('rel', 'ar')
-    a.href = usdzUrl
-    // Quick Look requires an <img> child to trigger on tap
-    const img = document.createElement('img')
-    a.appendChild(img)
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    return
-  }
-
-  // Android → Google Scene Viewer (opens GLB in native AR)
-  if (/Android/.test(ua) && glbUrl) {
-    const intentUrl =
-      `intent://arvr.google.com/scene-viewer/1.0` +
-      `?file=${encodeURIComponent(glbUrl)}` +
-      `&mode=ar_preferred` +
-      `#Intent;scheme=https;` +
-      `package=com.google.android.googlequicksearchbox;` +
-      `action=android.intent.action.VIEW;` +
-      `S.browser_fallback_url=${encodeURIComponent('https://developers.google.com/ar')};end;`
-    window.location.href = intentUrl
-    return
-  }
-
-  // Desktop / unsupported — friendly message
-  alert('AR is available on iPhone and Android phones. Open this page on your phone to try it!')
-}
-
 export default function ConfirmPage() {
   const router = useRouter()
 
+  const mvRef = useRef<ModelViewerHandle>(null)
   const [glbUrl, setGlbUrl]   = useState('')
-  const [usdzUrl, setUsdzUrl] = useState('')
-  const [rawGlb, setRawGlb]   = useState('')  // un-proxied, for AR (Scene Viewer needs a public URL)
+  const [iosUrl, setIosUrl]   = useState('')
   const [dims, setDims]       = useState<Dims | null>(null)
   const [showDims, setShowDims] = useState(false)
 
@@ -64,19 +28,20 @@ export default function ConfirmPage() {
       const raw = sessionStorage.getItem('makeit_model_urls')
       if (!raw) { router.replace('/'); return }
       const urls = JSON.parse(raw)
-      if (urls.glb) {
-        setRawGlb(urls.glb)
-        setGlbUrl(`/api/proxy?url=${encodeURIComponent(urls.glb)}`)
-      }
-      if (urls.usdz) setUsdzUrl(`/api/proxy?url=${encodeURIComponent(urls.usdz)}`)
+      if (urls.glb) setGlbUrl(`/api/proxy?url=${encodeURIComponent(urls.glb)}`)
+      if (urls.usdz) setIosUrl(`/api/proxy?url=${encodeURIComponent(urls.usdz)}`)
     } catch { router.replace('/') }
   }, [router])
 
-  const handleDimensions = useCallback((d: Dims) => {
-    setDims(d)
-  }, [])
+  const handleDimensions = useCallback((d: Dims) => setDims(d), [])
 
-  const handleAR = () => launchAR(rawGlb, usdzUrl)
+  const handleAR = () => {
+    if (mvRef.current) {
+      mvRef.current.activateAR()
+    } else {
+      alert('AR is available on iPhone and Android. Open this page on your phone!')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-orange-50 flex flex-col">
@@ -93,7 +58,9 @@ export default function ConfirmPage() {
         <div className="relative rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-gray-100 to-gray-200 flex-1" style={{ minHeight: '42vh' }}>
           {glbUrl && (
             <ModelViewer
+              ref={mvRef}
               glbUrl={glbUrl}
+              iosUrl={iosUrl}
               autoRotate
               showDimensions={showDims}
               onDimensions={handleDimensions}

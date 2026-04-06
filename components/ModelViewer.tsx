@@ -1,10 +1,15 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react'
 
 export interface Dims { x: number; y: number; z: number }
+export interface ModelViewerHandle { activateAR: () => void }
 
-// TypeScript declaration for the custom element
+type MVElement = HTMLElement & {
+  getDimensions?: () => { x: number; y: number; z: number }
+  activateAR?: () => void
+}
+
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -16,18 +21,16 @@ declare global {
         'camera-controls'?: string
         'auto-rotate'?: string
         'shadow-intensity'?: string
+        poster?: string
         style?: React.CSSProperties
       }
     }
   }
 }
 
-type ModelViewerElement = HTMLElement & {
-  getDimensions?: () => { x: number; y: number; z: number }
-}
-
 interface ModelViewerProps {
   glbUrl: string
+  iosUrl?: string
   autoRotate?: boolean
   showDimensions?: boolean
   onDimensions?: (dims: Dims) => void
@@ -35,17 +38,23 @@ interface ModelViewerProps {
 
 function toCm(v: number) { return (v * 100).toFixed(1) }
 
-export default function ModelViewer({
-  glbUrl,
-  autoRotate = true,
-  showDimensions = false,
-  onDimensions,
-}: ModelViewerProps) {
-  const ref = useRef<ModelViewerElement>(null)
+const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(function ModelViewer(
+  { glbUrl, iosUrl, autoRotate = true, showDimensions = false, onDimensions },
+  ref,
+) {
+  const elRef = useRef<MVElement>(null)
   const [dims, setDims] = useState<Dims | null>(null)
+  const [ready, setReady] = useState(false)
 
+  // Wait for the custom element to be registered before rendering
   useEffect(() => {
-    const el = ref.current
+    if (typeof customElements === 'undefined') return
+    customElements.whenDefined('model-viewer').then(() => setReady(true))
+  }, [])
+
+  // Fire onDimensions when model loads
+  useEffect(() => {
+    const el = elRef.current
     if (!el) return
     const handler = () => {
       const d = el.getDimensions?.()
@@ -56,37 +65,47 @@ export default function ModelViewer({
     }
     el.addEventListener('load', handler)
     return () => el.removeEventListener('load', handler)
-  }, [onDimensions])
+  }, [onDimensions, ready])
+
+  // Expose activateAR to parent via ref
+  useImperativeHandle(ref, () => ({
+    activateAR: () => elRef.current?.activateAR?.(),
+  }))
+
+  if (!ready) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+        <div className="text-3xl animate-spin">⚙️</div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <model-viewer
-        ref={ref as any}
+        ref={elRef as React.RefObject<HTMLElement>}
         src={glbUrl}
+        {...(iosUrl ? { 'ios-src': iosUrl, ar: '', 'ar-modes': 'quick-look scene-viewer webxr' } : {})}
         camera-controls=""
         {...(autoRotate ? { 'auto-rotate': '' } : {})}
         shadow-intensity="1"
         style={{ width: '100%', height: '100%', background: 'transparent' }}
       />
 
-      {/* Dimension overlay */}
       {showDimensions && dims && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 pointer-events-none">
-          {[
-            { label: 'W', value: toCm(dims.x) },
-            { label: 'H', value: toCm(dims.y) },
-            { label: 'D', value: toCm(dims.z) },
-          ].map(({ label, value }) => (
+          {([['W', dims.x], ['H', dims.y], ['D', dims.z]] as [string, number][]).map(([label, value]) => (
             <div
               key={label}
               className="bg-white/95 border border-orange-200 text-orange-600 font-bold text-xs px-3 py-1.5 rounded-full shadow"
             >
-              {label} {value} cm
+              {label} {toCm(value)} cm
             </div>
           ))}
         </div>
       )}
     </div>
   )
-}
+})
+
+export default ModelViewer

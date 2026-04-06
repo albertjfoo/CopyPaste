@@ -32,8 +32,6 @@ export default function ResultPage() {
 
   const [modelUrls, setModelUrls]   = useState<ModelUrls | null>(null)
   const [glbUrl, setGlbUrl]         = useState('')           // proxied URL for viewer
-  const [thumbnail, setThumbnail]   = useState('')
-  const [show3D, setShow3D]         = useState(false)
   const [editState, setEditState]   = useState<EditState>('idle')
   const [editText, setEditText]     = useState('')
   const [editProgress, setEditProgress] = useState(0)
@@ -48,7 +46,6 @@ export default function ResultPage() {
       const urls: ModelUrls = JSON.parse(raw)
       setModelUrls(urls)
       if (urls.glb) setGlbUrl(`/api/proxy?url=${encodeURIComponent(urls.glb)}`)
-      setThumbnail(sessionStorage.getItem('makeit_thumbnail') ?? '')
     } catch {
       router.replace('/')
     }
@@ -98,7 +95,6 @@ export default function ResultPage() {
             sessionStorage.setItem('makeit_model_urls', JSON.stringify(updated))
             setModelUrls(updated)
             setGlbUrl(`/api/proxy?url=${encodeURIComponent(newGlb)}`)
-            setShow3D(true)
             setEditState('done')
             setEditText('')
             es.close()
@@ -136,23 +132,10 @@ export default function ResultPage() {
         <p className="text-gray-400 text-sm mt-1">Drag to spin it around</p>
       </div>
 
-      {/* Model preview */}
+      {/* 3D Viewer */}
       <div className="mx-4 mt-4 rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-gray-100 to-gray-200" style={{ height: '50vh' }}>
-        {show3D && glbUrl ? (
+        {glbUrl ? (
           <ModelViewer glbUrl={glbUrl} />
-        ) : thumbnail ? (
-          <div className="relative w-full h-full">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/api/proxy?url=${encodeURIComponent(thumbnail)}`} alt="3D model preview" className="w-full h-full object-contain" />
-            {glbUrl && (
-              <button
-                onClick={() => setShow3D(true)}
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-sm font-bold px-5 py-2.5 rounded-full backdrop-blur"
-              >
-                View in 3D
-              </button>
-            )}
-          </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xl">
             Preview not available
