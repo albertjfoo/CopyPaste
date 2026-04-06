@@ -16,7 +16,7 @@ My mom is not technical. But she lives in a house full of things that break — 
 
 The process took days. It shouldn't.
 
-## What We Did Instead
+## Current Solution
 
 Whenever my mom needed something, she'd just FaceTime me — point the camera at the broken object, describe what she wanted, and we'd figure it out together over video. That handoff was natural and low friction for her. The problem was everything after: me modeling it, going back and forth on adjustments, printing it, and shipping it to her.
 
