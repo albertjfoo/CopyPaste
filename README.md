@@ -1,7 +1,7 @@
 [README.md](https://github.com/user-attachments/files/26494163/README.md)
 
-Try it now: [copypaste-production-b336.up.railway.app
-](url)
+Try it now [here](copypaste-production-b336.up.railway.app)
+
 # CopyPaste — AI-Powered 3D Printing for Everyone
 
 > *My mom kept calling me to print things for her. I built this so she doesn't have to.*
