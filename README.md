@@ -4,7 +4,7 @@
 
 | Film it | Print it |
 |---|---|
-| ![Filming demo](Filming.gif) | ![Print demo](Print.gif) |
+| ![Filming demo](Filming.gif) | ![Print demo](Hook.gif) |
 
 > *My mom kept calling me to print things for her. I built this so she doesn't have to.*
 
