@@ -146,7 +146,7 @@ export default function ReviewPage() {
           disabled={submitting}
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 active:scale-95 transition-all text-white text-3xl font-black py-6 rounded-3xl shadow-xl"
         >
-          {submitting ? '⏳ Sending…' : 'Make It! 🚀'}
+          {submitting ? '⏳ Sending…' : 'CopyPaste! 🚀'}
         </button>
 
         <div className="h-4" />

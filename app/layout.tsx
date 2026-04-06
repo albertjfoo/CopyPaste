@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Make It!',
+  title: 'CopyPaste',
   description: 'Turn any object into a 3D printable file',
 }
 

@@ -109,7 +109,7 @@ export default function PreviewPage() {
           disabled={submitting}
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 active:scale-95 transition-all text-white text-3xl font-black py-7 rounded-3xl shadow-xl"
         >
-          {submitting ? '⏳ Starting…' : 'Make It 3D! 🚀'}
+          {submitting ? '⏳ Starting…' : 'CopyPaste It! 🚀'}
         </button>
 
         <div className="h-4" />
