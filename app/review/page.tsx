@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ExtractedFrame } from '@/lib/frameExtractor'
 import Image from 'next/image'
@@ -11,12 +11,9 @@ export default function ReviewPage() {
   const [candidates, setCandidates] = useState<ExtractedFrame[]>([])
   const [selectedIndices, setSelectedIndices] = useState<number[]>([])
   const [prompt, setPrompt] = useState('')
-  const [swapTarget, setSwapTarget] = useState<number | null>(null) // index in selectedIndices to swap
-  const [listening, setListening] = useState(false)
+  const [swapTarget, setSwapTarget] = useState<number | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null)
 
   // Load from sessionStorage
   useEffect(() => {
@@ -33,24 +30,6 @@ export default function ReviewPage() {
       router.replace('/record')
     }
   }, [router])
-
-  // Speech recognition
-  const startListening = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-
-    if (!SpeechRecognition) return
-    const r = new SpeechRecognition()
-    r.continuous = false
-    r.interimResults = false
-    r.lang = 'en-US'
-    r.onresult = (e) => setPrompt(e.results[0][0].transcript)
-    r.onend = () => setListening(false)
-    r.onerror = () => setListening(false)
-    recognitionRef.current = r
-    r.start()
-    setListening(true)
-  }
 
   const swapFrame = (candidateIdx: number) => {
     if (swapTarget === null) return
@@ -145,30 +124,13 @@ export default function ReviewPage() {
           <p className="text-sm text-gray-400">
             Tell us what it is or how you&apos;d like it to look
           </p>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. a red ceramic mug"
-              className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-orange-400"
-            />
-            <button
-              onClick={startListening}
-              className={`px-4 py-3 rounded-xl text-2xl border-2 transition-colors ${
-                listening
-                  ? 'bg-red-100 border-red-400 animate-pulse'
-                  : 'bg-gray-100 border-gray-200'
-              }`}
-              title="Speak your description"
-              aria-label="Use voice"
-            >
-              🎤
-            </button>
-          </div>
-          {listening && (
-            <p className="text-sm text-red-500 animate-pulse">Listening… speak now</p>
-          )}
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="e.g. a red ceramic mug"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-orange-400"
+          />
         </div>
 
         {/* Error */}
