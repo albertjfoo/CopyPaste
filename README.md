@@ -2,6 +2,8 @@
 
 🔗 **[copypaste-production-b336.up.railway.app](https://copypaste-production-b336.up.railway.app)**
 
+![QR Code](https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://copypaste-production-b336.up.railway.app&margin=10)
+
 | Film it | Print it |
 |---|---|
 | ![Filming demo](Filming.gif) | ![Print demo](Hook.gif) |
