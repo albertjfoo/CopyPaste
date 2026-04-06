@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Prevent pull-to-refresh on iOS so the camera UI feels native */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Make tap highlight invisible for button-like elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
