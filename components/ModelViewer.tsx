@@ -46,10 +46,22 @@ const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(function Mod
   const [dims, setDims] = useState<Dims | null>(null)
   const [ready, setReady] = useState(false)
 
-  // Wait for the custom element to be registered before rendering
+  // Load script and wait for custom element to register
   useEffect(() => {
     if (typeof customElements === 'undefined') return
-    customElements.whenDefined('model-viewer').then(() => setReady(true))
+    const load = () => customElements.whenDefined('model-viewer').then(() => setReady(true))
+    if (customElements.get('model-viewer')) {
+      setReady(true)
+      return
+    }
+    if (!document.querySelector('script[data-mv]')) {
+      const s = document.createElement('script')
+      s.type = 'module'
+      s.dataset.mv = '1'
+      s.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js'
+      document.head.appendChild(s)
+    }
+    load()
   }, [])
 
   // Fire onDimensions when model loads
