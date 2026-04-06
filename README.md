@@ -1,6 +1,6 @@
 [README.md](https://github.com/user-attachments/files/26494163/README.md)
 
-Try it now [here](copypaste-production-b336.up.railway.app)
+Try it now -> copypaste-production-b336.up.railway.app
 
 # CopyPaste — AI-Powered 3D Printing for Everyone
 
