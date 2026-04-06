@@ -44,16 +44,9 @@ const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(function Mod
 ) {
   const elRef = useRef<MVElement>(null)
   const [dims, setDims] = useState<Dims | null>(null)
-  const [ready, setReady] = useState(false)
 
-  // Load script and wait for custom element to register
+  // Inject script once — model-viewer upgrades automatically when registered
   useEffect(() => {
-    if (typeof customElements === 'undefined') return
-    const load = () => customElements.whenDefined('model-viewer').then(() => setReady(true))
-    if (customElements.get('model-viewer')) {
-      setReady(true)
-      return
-    }
     if (!document.querySelector('script[data-mv]')) {
       const s = document.createElement('script')
       s.type = 'module'
@@ -61,7 +54,6 @@ const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(function Mod
       s.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js'
       document.head.appendChild(s)
     }
-    load()
   }, [])
 
   // Fire onDimensions when model loads
@@ -77,20 +69,12 @@ const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(function Mod
     }
     el.addEventListener('load', handler)
     return () => el.removeEventListener('load', handler)
-  }, [onDimensions, ready])
+  }, [onDimensions])
 
   // Expose activateAR to parent via ref
   useImperativeHandle(ref, () => ({
     activateAR: () => elRef.current?.activateAR?.(),
   }))
-
-  if (!ready) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100">
-        <div className="text-3xl animate-spin">⚙️</div>
-      </div>
-    )
-  }
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
