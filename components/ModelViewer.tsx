@@ -2,7 +2,7 @@
 
 import { Suspense, useRef, useEffect, useState, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Environment, useGLTF, Html } from '@react-three/drei'
+import { OrbitControls, useGLTF, Html } from '@react-three/drei'
 import * as THREE from 'three'
 
 export interface Dims { x: number; y: number; z: number }
@@ -169,11 +169,11 @@ export default function ModelViewer({
     <Canvas
       style={{ width: '100%', height: '100%' }}
       camera={{ position: [0, 1.2, 3.5], fov: 42 }}
-      gl={{ antialias: true }}
+      gl={{ antialias: false, powerPreference: 'low-power' }}
     >
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
-      <Environment preset="city" />
+      <ambientLight intensity={0.9} />
+      <directionalLight position={[5, 10, 5]} intensity={1.2} />
+      <directionalLight position={[-5, -5, -5]} intensity={0.3} />
       <Suspense fallback={<Loader />}>
         <Model
           url={glbUrl}
